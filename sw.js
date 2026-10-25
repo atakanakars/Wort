@@ -1,5 +1,5 @@
-// Basit çevrimdışı önbellek: önce önbellekten göster, arkada güncelle. Başka sitelere (Supabase) dokunmaz.
-const CACHE = 'wort-v1';
+// Ağ öncelikli önbellek: internet varsa her zaman en yeni dosyalar; yoksa (ya da çok yavaşsa) önbellekten çevrimdışı açılır.
+const CACHE = 'wort-v2';
 const ASSETS = ['./', './index.html', './app.js', './config.js', './styles.css', './words.json',
   './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
@@ -16,9 +16,15 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== location.origin) return;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const hit = (await cache.match(req, { ignoreSearch: true })) || (req.mode === 'navigate' ? await cache.match('./index.html') : null);
-    const net = fetch(req).then((r) => { if (r && r.ok) cache.put(req, r.clone()); return r; }).catch(() => null);
-    e.waitUntil(net);
-    return hit || (await net) || new Response('Çevrimdışı ve önbellekte yok.', { status: 503 });
+    const fromCache = () => cache.match(req, { ignoreSearch: true }).then((r) => r || (req.mode === 'navigate' ? cache.match('./index.html') : null));
+    const net = fetch(req, { cache: 'no-cache' }).then((r) => { if (r && r.ok) cache.put(req, r.clone()); return r; });
+    try {
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('yavaş')), 4000));
+      return await Promise.race([net, timeout]);
+    } catch {
+      const hit = await fromCache();
+      if (hit) { net.catch(() => {}); return hit; }
+      try { return await net; } catch { return new Response('Çevrimdışı ve önbellekte yok.', { status: 503 }); }
+    }
   })());
 });
