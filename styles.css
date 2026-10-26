@@ -132,3 +132,5 @@ input.field:focus { border-color: var(--ink); }
 
 .opts.art { grid-template-columns: repeat(3, 1fr); }
 .opts.art .opt { justify-content: center; font-family: var(--serif); font-size: 28px; font-weight: 600; min-height: 76px; text-align: center; gap: 8px; }
+.prompt.sm { font-size: 24px; line-height: 1.3; font-weight: 600; }
+.opt span:first-child { text-align: left; }
