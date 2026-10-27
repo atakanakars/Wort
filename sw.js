@@ -1,5 +1,5 @@
 // Ağ öncelikli önbellek: internet varsa her zaman en yeni dosyalar; yoksa (ya da çok yavaşsa) önbellekten çevrimdışı açılır.
-const CACHE = 'wort-v4';
+const CACHE = 'wort-v6';
 const ASSETS = ['./', './index.html', './app.js', './config.js', './styles.css', './words.json',
   './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
